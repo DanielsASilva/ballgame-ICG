@@ -15,38 +15,40 @@ ball::ball(float startX, float startY, float startZ, float r) {
     cameraDistance = 10.0f;
     cameraTheta = 00.0f;
     cameraPhi = 70.0f;
-    friction = 0.9f;
+    friction = 0.98f;
+    isCharging = false;
+    chargeTime = 0.0f;
 }
 
 void ball::updatePhysics(float deltaTime) {
-   
-    float moveSpeed = 5.0f;
+       
+    float moveSpeed = 15.0f;
     float jumpForce = 5.0f;
+    float accelX = 0.0f;
+    float accelZ = 0.0f;
 
     float forwardX = -cos(degToRad(cameraTheta));
     float forwardZ = -sin(degToRad(cameraTheta));
 
     float rightX = sin(degToRad(cameraTheta));
     float rightZ = -cos(degToRad(cameraTheta));
-        
-    velX = 0;
-    velZ = 0;
+    
 
         if(keyBuffer['w']){
-            velX += forwardX * moveSpeed;
-            velZ += forwardZ * moveSpeed;
+            accelX += forwardX * moveSpeed;
+            accelZ += forwardZ * moveSpeed;
         }
         if(keyBuffer['s']){
-            velX += -forwardX * moveSpeed;
-            velZ += -forwardZ * moveSpeed;
+            accelX += -forwardX * moveSpeed;
+            accelZ += -forwardZ * moveSpeed;
         }
         if(keyBuffer['a']){
-            velX += -rightX * moveSpeed;
-            velZ += -rightZ * moveSpeed;
+            accelX += -rightX * moveSpeed;
+            accelZ += -rightZ * moveSpeed;
         }
         if(keyBuffer['d']){
-            velX += rightX * moveSpeed;
-            velZ += rightZ * moveSpeed;
+            accelX += rightX * moveSpeed;
+            accelZ += rightZ * moveSpeed;
         }
         if(keyBuffer[' ']){
             if(isGrounded){ 
@@ -60,19 +62,30 @@ void ball::updatePhysics(float deltaTime) {
                 velY -= 19.6f * deltaTime;
             }
         }
+        if(keyBuffer['e']){
+            
+        }
+    
+    if(isGrounded){
+        velX += accelX * deltaTime;
+        velZ += accelZ * deltaTime;
+    }
 
     // Applying gravity if the ball is on air
     if(!isGrounded) {
         velY -= 9.8f * deltaTime;
     }
 
+    if(isGrounded){
+        velX *= friction;
+        velZ *= friction;
+    }
+
     x += velX * deltaTime;
     y += velY * deltaTime;
     z += velZ * deltaTime;
    
-    velX *= friction;
-    velZ *= friction;
-    
+
     // ground collision (0.0 = ground level)
     if(y - rad < 0.0f) {
         y = rad;
@@ -100,41 +113,6 @@ void ball::render() {
     glColor3f(R, G, B);
     glutSolidSphere(rad, 20, 20);
     glPopMatrix();
-}
-
-void ball::handleInput(unsigned char key) {
-    float moveSpeed = 5.0f;
-    float jumpForce = 5.0f;
-
-    float forwardX = cos(degToRad(cameraTheta));
-    float forwardZ = sin(degToRad(cameraTheta));
-
-    float rightX = sin(degToRad(cameraTheta));
-    float rightZ = -cos(degToRad(cameraTheta));
-
-    switch(key){
-        case 'w':
-            velX = forwardX * moveSpeed;
-            velZ = forwardZ * moveSpeed;
-            break;
-        case 's':
-            velX = -forwardX * moveSpeed;
-            velZ = -forwardZ * moveSpeed;
-            break;
-        case 'a':
-            velX = -rightX * moveSpeed;
-            velZ = -rightZ * moveSpeed;
-            break;
-        case 'd':
-            velX = rightX * moveSpeed;
-            velZ = rightZ * moveSpeed;
-            break;
-        case ' ':
-            if(isGrounded) {
-                velY = jumpForce;
-                isGrounded = false;
-            }
-    }
 }
 
 void ball::handleCameraInput(int key) {

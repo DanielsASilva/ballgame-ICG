@@ -24,3 +24,11 @@ void level::render() {
     }
     glEnd();
 }
+
+void level::addMedal(float x, float y, float z){
+    medals.push_back({x, y, z, false});
+}
+
+void level::addObstacle(float x, float y, float z, float sizeX, float sizeY, float sizeZ){
+    obstacles.push_back({x, y, z, sizeX, sizeY, sizeZ});
+}
