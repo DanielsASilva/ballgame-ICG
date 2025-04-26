@@ -5,3 +5,5 @@ Be sure you have freeGLUT instaled on your computer, and run the following comma
 ```
 g++ main.cpp ball.cpp level.cpp -o game -lglut -lGL -lGLU
 ```
+## Future Improvements
+- Keyboard controls for a game where you can move 360 degrees are pretty rough. Being able to use a gamepad to play this game would be ideal
