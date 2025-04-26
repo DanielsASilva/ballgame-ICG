@@ -13,7 +13,7 @@ ball::ball(float startX, float startY, float startZ, float r) {
     B = 0.0f;
     isGrounded = true;
     cameraDistance = 10.0f;
-    cameraTheta = 00.0f; // start behind ball
+    cameraTheta = 00.0f;
     cameraPhi = 70.0f;
     friction = 0.9f;
 }
@@ -23,11 +23,11 @@ void ball::updatePhysics(float deltaTime) {
     float moveSpeed = 5.0f;
     float jumpForce = 5.0f;
 
-    float forwardX = sin(degToRad(cameraTheta));
-    float forwardZ = cos(degToRad(cameraTheta));
+    float forwardX = -cos(degToRad(cameraTheta));
+    float forwardZ = -sin(degToRad(cameraTheta));
 
-    float rightX = cos(degToRad(cameraTheta));
-    float rightZ = -sin(degToRad(cameraTheta));
+    float rightX = sin(degToRad(cameraTheta));
+    float rightZ = -cos(degToRad(cameraTheta));
         
     velX = 0;
     velZ = 0;
@@ -49,9 +49,15 @@ void ball::updatePhysics(float deltaTime) {
             velZ += rightZ * moveSpeed;
         }
         if(keyBuffer[' ']){
-            if(isGrounded) {
+            if(isGrounded){ 
                 velY = jumpForce;
                 isGrounded = false;
+            }
+        }
+        if(keyBuffer['q']){
+            if(!isGrounded){
+                velX = velZ = 0.0f;
+                velY -= 19.6f * deltaTime;
             }
         }
 
