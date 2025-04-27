@@ -139,3 +139,21 @@ void ball::handleCameraInput(int key) {
         
     cameraPhi = std::clamp(cameraPhi, 1.0f, 90.0f);
 }
+
+void ball::medalCollected(){
+    if(medalsCollected <= 5){
+        medalsCollected += 1;
+    }
+}
+
+float ball::getX(){
+    return x;
+}
+
+float ball::getY(){
+    return y;
+}
+
+float ball::getZ(){
+    return z;
+}

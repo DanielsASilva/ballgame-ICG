@@ -7,3 +7,4 @@ g++ main.cpp ball.cpp level.cpp -o game -lglut -lGL -lGLU
 ```
 ## Future Improvements
 - Keyboard controls for a game where you can move 360 degrees are pretty rough. Being able to use a gamepad to play this game would be ideal
+- Add an idle spinning animation for medals, and a shrinking animation when they are collected

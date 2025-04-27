@@ -11,6 +11,9 @@ void display() {
     playerBall->updateCamera();
     renderLevel->render();
     playerBall->render();
+    if(renderLevel->collectMedal(playerBall->getX(), playerBall->getY(), playerBall->getZ(), 0.5f)){
+        playerBall->medalCollected();        
+    }
     glutSwapBuffers();
 }
 
