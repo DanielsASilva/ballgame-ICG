@@ -1,17 +1,18 @@
 #include "ball.h"
 #include "level.h"
+#include <cstdio>
 
 ball*  playerBall;
 level* renderLevel;
 
 void display() {
-    glClearColor(0.529f, 0.808f, 0.922f, 1.0f);
+    glClearColor(0.529f, 0.808f, 0.922f, 1.0f); // skybox
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
     glLoadIdentity();
-    playerBall->updateCamera();
+    playerBall->updateCamera(); 
     renderLevel->render();
     playerBall->render();
-    if(renderLevel->collectMedal(playerBall->getX(), playerBall->getY(), playerBall->getZ(), 0.5f)){
+    if(renderLevel->collectMedal(playerBall->getX(), playerBall->getY(), playerBall->getZ(), 0.5f)){ // checks for medal collision
         playerBall->medalCollected();        
     }
     glutSwapBuffers();
@@ -30,10 +31,10 @@ void arrowkeys(int key, int x, int y){
 }
 
 void update(int value) {
-    float deltaTime = 0.016f;
+    float deltaTime = 0.016f; // 1 / 60
     playerBall->updatePhysics(deltaTime, *renderLevel); // receives a reference to level to handle collisions
-    glutPostRedisplay();
-    glutTimerFunc(16, update, 0);
+    glutPostRedisplay(); // calls Display function
+    glutTimerFunc(16, update, 0); // recalls the update function every 16ms
 }
 
 void reshape(int w, int h){
@@ -62,7 +63,7 @@ int main(int argc, char** argv) {
     glutKeyboardUpFunc(keyboardUp); // key not pressed
 
     glutSpecialFunc(arrowkeys);
-    glutTimerFunc(0, update, 0);
+    glutTimerFunc(0, update, 0); // starts the timer loop
 
     glutMainLoop();
     return 0;

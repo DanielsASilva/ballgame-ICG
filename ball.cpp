@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <stdio.h>
+
 ball::ball(float startX, float startY, float startZ, float r) {
     x = startX;
     y = startY;
@@ -16,68 +17,69 @@ ball::ball(float startX, float startY, float startZ, float r) {
     cameraTheta = 00.0f;
     cameraPhi = 70.0f;
     friction = 0.98f;
-    isCharging = false;
-    chargeTime = 0.0f;
 }
 
 void ball::updatePhysics(float deltaTime, const level& level) {
        
     float moveSpeed = 15.0f;
     float jumpForce = 5.5f;
+    
     float accelX = 0.0f;
     float accelZ = 0.0f;
 
+    // defines the direction the ball is facing
+    // everything is multiplied by -1 because the ball starts facing the -x and -z directions
     float forwardX = -cos(degToRad(cameraTheta));
     float forwardZ = -sin(degToRad(cameraTheta));
 
     float rightX = sin(degToRad(cameraTheta));
     float rightZ = -cos(degToRad(cameraTheta));
     
+    // input buffer handling
+    if(keyBuffer['w']){
+        accelX += forwardX * moveSpeed; // uses directional vectors to define how much the ball is accelerating in each axis
+        accelZ += forwardZ * moveSpeed;
+    }
+    if(keyBuffer['s']){
+        accelX += -forwardX * moveSpeed;
+        accelZ += -forwardZ * moveSpeed;
+    }
+    if(keyBuffer['a']){
+        accelX += -rightX * moveSpeed;
+        accelZ += -rightZ * moveSpeed;
+    }
+    if(keyBuffer['d']){
+        accelX += rightX * moveSpeed;
+        accelZ += rightZ * moveSpeed;
+    }
+    if(keyBuffer[' ']){
+        if(isGrounded){ 
+            velY = jumpForce;
+            isGrounded = false;
+        }
+    }
+    if(keyBuffer['q']){
+        if(!isGrounded){
+            velX = velZ = 0.0f;
+            velY -= 19.6f * deltaTime;
+        }if(isGrounded){
+           velX = velZ = 0.0f; 
+        }
+    }
+    if(keyBuffer['1']){ // checkpoints for debug
+        x = -15.0f;
+        y = 5.5f;
+        z = -10.0f;
+    }if(keyBuffer['2']){
+        x = 13.0f;
+        y = 5.5f;
+        z = -10.0f;
+    }if(keyBuffer['3']){
+        x = 13.0f;
+        y = 3.0f;
+        z = 10.0f;
+    }
 
-        if(keyBuffer['w']){
-            accelX += forwardX * moveSpeed;
-            accelZ += forwardZ * moveSpeed;
-        }
-        if(keyBuffer['s']){
-            accelX += -forwardX * moveSpeed;
-            accelZ += -forwardZ * moveSpeed;
-        }
-        if(keyBuffer['a']){
-            accelX += -rightX * moveSpeed;
-            accelZ += -rightZ * moveSpeed;
-        }
-        if(keyBuffer['d']){
-            accelX += rightX * moveSpeed;
-            accelZ += rightZ * moveSpeed;
-        }
-        if(keyBuffer[' ']){
-            if(isGrounded){ 
-                velY = jumpForce;
-                isGrounded = false;
-            }
-        }
-        if(keyBuffer['q']){
-            if(!isGrounded){
-                velX = velZ = 0.0f;
-                velY -= 19.6f * deltaTime;
-            }
-        }
-        if(keyBuffer['e']){
-                       
-        }if(keyBuffer['1']){ // checkpoints for debug
-            x = -15.0f;
-            y = 5.5f;
-            z = -10.0f;
-        }if(keyBuffer['2']){
-            x = 13.0f;
-            y = 5.5f;
-            z = -10.0f;
-        }if(keyBuffer['3']){
-            x = 13.0f;
-            y = 3.0f;
-            z = 10.0f;
-        }
-    
     if(isGrounded){
         velX += accelX * deltaTime;
         velZ += accelZ * deltaTime;
@@ -97,8 +99,10 @@ void ball::updatePhysics(float deltaTime, const level& level) {
     y += velY * deltaTime;
     z += velZ * deltaTime;
     
-
+    // checks and handles the ball collision
     bool ballCollision = level.obstacleCollision(x, y, z, rad, velX, velY, velZ);
+
+    // checks if the ball is above something, so gravity still affects it when it falls from it
     if(ballCollision == true && y > 0){
         isGrounded = true;
     } else if(ballCollision == false && y > 0){

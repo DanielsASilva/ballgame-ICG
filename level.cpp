@@ -6,9 +6,12 @@
 level::level(float size, float y) {
     groundSize = size;
     groundY = y;
+    
+    // initialize medal positions
     addMedal(-15.0f, 5.5f, -10.0f);
     addMedal(13.0f, 5.5f, -10.0f);
     addMedal(13.0f, 3.0f, 10.0f);
+    // initialize obstacle positions
     addObstacle(-5.0f, 0.75f, 0.0f, 2.5f, 0.75f, 2.5f);
     addObstacle(-10.0f, 1.5f, 0.0f, 2.5f, 1.5f, 2.5f);
     addObstacle(-15.0f, 2.25f, 0.0f, 2.5f, 2.25f, 2.5f);
@@ -22,15 +25,16 @@ level::level(float size, float y) {
 }
 
 void level::render() {
+    // renders the ground
     glColor3f(0.4f, 0.6f, 0.2f);
-    
     glBegin(GL_QUADS);
-        glVertex3f(-groundSize, groundY, -groundSize); // Bottom-left
-        glVertex3f( groundSize, groundY, -groundSize); // Bottom-right
-        glVertex3f( groundSize, groundY,  groundSize); // Top-right
-        glVertex3f(-groundSize, groundY,  groundSize); // Top-left
+        glVertex3f(-groundSize, groundY, -groundSize); // bottom left
+        glVertex3f( groundSize, groundY, -groundSize); // bottom right
+        glVertex3f( groundSize, groundY,  groundSize); // top right
+        glVertex3f(-groundSize, groundY,  groundSize); // top left
     glEnd();
 
+    // renders a grid
     glColor3f(0.3f, 0.3f, 0.3f);
     glBegin(GL_LINES);
     for(float i = -groundSize; i <= groundSize; i += 1.0f) {
@@ -83,6 +87,7 @@ void level::addObstacle(float x, float y, float z, float sizeX, float sizeY, flo
 bool level::collectMedal(float ballX, float ballY, float ballZ, float r){
    for (auto& medal : medals){
         if(!medal.collected){
+           // distances between ball and medal
            float dx = ballX - medal.x;
            float dy = ballY - medal.y;
            float dz = ballZ - medal.z;
@@ -101,52 +106,69 @@ bool level::collectMedal(float ballX, float ballY, float ballZ, float r){
 
 bool level::obstacleCollision(float& ballX, float& ballY, float& ballZ, float r, float& velX, float& velY, float& velZ) const{
     for (const auto& obstacle : obstacles) {
+        // finds the limits of the bounding box
         float minX = obstacle.x - obstacle.sizeX;
         float maxX = obstacle.x + obstacle.sizeX;
         float minY = obstacle.y - obstacle.sizeY;
         float maxY = obstacle.y + obstacle.sizeY;
         float minZ = obstacle.z - obstacle.sizeZ;
         float maxZ = obstacle.z + obstacle.sizeZ;
-
+        
+        // find closest point to the ball
         float closestX = std::max(minX, std::min(ballX, maxX));
         float closestY = std::max(minY, std::min(ballY, maxY));
         float closestZ = std::max(minZ, std::min(ballZ, maxZ));
+        
+        // finds distance between the ball and the closest points
         float dx = ballX - closestX;
         float dy = ballY - closestY;
         float dz = ballZ - closestZ;
-        float distance = dx*dx + dy*dy + dz*dz;
+        float distance = dx*dx + dy*dy + dz*dz; // distance squared
         
+        // if distance < radius (squared), a collision has occured
         if(distance < r * r){
+            // finds the real distance
             float dist = std::sqrt(distance);
             
+            // collision direction vector (points from obstacle to the ball)
             float nx = dx / dist;
             float ny = dy / dist;
             float nz = dz / dist;
-                
+            
+            // top surface collision (fix nan glitch)
             if(closestY == maxY && dy > 0){
-                ny = 1.0f;
-                nx = nz = 0.0f;
+                ny = 1.0f; // normal pointing up
+                nx = nz = 0.0f; // no horizontal components
+              // side collision
             } else if (closestY != maxY && closestY != minY){
-                ny = 0.0f;
+                ny = 0.0f; // remove vertical component
+                           // had a bug where the ball would go up when hitting the obstacle sides
                 float length = std::sqrt(nx*nx + nz*nz);
                 if(length > 0){
+                    // ensures that its a unit vector
                     nx /= length;
                     nz /= length;
+                  // edge case
                 } else {
                     nx = 1.0f;
                     nz = 0.0f;
                 }
             }
 
+            // move ball to the obstacle surface
             ballX = closestX + nx * r;
             ballY = closestY + ny * r;
             ballZ = closestZ + nz * r;
 
+            // top collision
             if (closestY == maxY && dy > 0){
-                    velY = 0;
+                    velY = 0; // stop any vertical movement
+              // bottom collision
             } else if (closestY == minY && dy < 0){
-                    velY *= -0.5f;
+                    velY *= -0.5f; // bounce with speed loss
+              // side collision           
             } else {
+                // reflect velocity with 20% speed loss
                 float dot = velX * nx + velY * ny + velZ * nz;
                 velX -= 2 * dot * nx * 0.8f;
                 velY -= 2 * dot * ny * 0.8f;
@@ -155,5 +177,6 @@ bool level::obstacleCollision(float& ballX, float& ballY, float& ballZ, float r,
             return true;
         }
     }
+    // no collisions detected
     return false;
 }
