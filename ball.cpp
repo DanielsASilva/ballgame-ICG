@@ -1,7 +1,7 @@
 #include "ball.h"
 #include <cmath>
 #include <algorithm>
-
+#include <stdio.h>
 ball::ball(float startX, float startY, float startZ, float r) {
     x = startX;
     y = startY;
@@ -20,10 +20,10 @@ ball::ball(float startX, float startY, float startZ, float r) {
     chargeTime = 0.0f;
 }
 
-void ball::updatePhysics(float deltaTime) {
+void ball::updatePhysics(float deltaTime, const level& level) {
        
     float moveSpeed = 15.0f;
-    float jumpForce = 5.0f;
+    float jumpForce = 5.5f;
     float accelX = 0.0f;
     float accelZ = 0.0f;
 
@@ -63,7 +63,19 @@ void ball::updatePhysics(float deltaTime) {
             }
         }
         if(keyBuffer['e']){
-            
+                       
+        }if(keyBuffer['1']){ // checkpoints for debug
+            x = -15.0f;
+            y = 5.5f;
+            z = -10.0f;
+        }if(keyBuffer['2']){
+            x = 13.0f;
+            y = 5.5f;
+            z = -10.0f;
+        }if(keyBuffer['3']){
+            x = 13.0f;
+            y = 3.0f;
+            z = 10.0f;
         }
     
     if(isGrounded){
@@ -84,8 +96,14 @@ void ball::updatePhysics(float deltaTime) {
     x += velX * deltaTime;
     y += velY * deltaTime;
     z += velZ * deltaTime;
-   
+    
 
+    bool ballCollision = level.obstacleCollision(x, y, z, rad, velX, velY, velZ);
+    if(ballCollision == true && y > 0){
+        isGrounded = true;
+    } else if(ballCollision == false && y > 0){
+        isGrounded = false;
+    }
     // ground collision (0.0 = ground level)
     if(y - rad < 0.0f) {
         y = rad;

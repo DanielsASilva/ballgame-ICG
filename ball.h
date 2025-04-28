@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glut.h>
-
+#include "level.h"
 class ball {
     public:
         ball(float startX, float startY, float startZ, float r); // constructor
@@ -10,7 +10,7 @@ class ball {
         float getY();
         float getZ();
         
-        void updatePhysics(float deltaTime);                     // update physics
+        void updatePhysics(float deltaTime, const level& level); // update physics
         void updateCamera();                                     // update camera
         void render();                                           // renders the ball
         void handleInput(unsigned char key);

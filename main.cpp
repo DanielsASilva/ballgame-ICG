@@ -31,7 +31,7 @@ void arrowkeys(int key, int x, int y){
 
 void update(int value) {
     float deltaTime = 0.016f;
-    playerBall->updatePhysics(deltaTime);
+    playerBall->updatePhysics(deltaTime, *renderLevel); // receives a reference to level to handle collisions
     glutPostRedisplay();
     glutTimerFunc(16, update, 0);
 }
